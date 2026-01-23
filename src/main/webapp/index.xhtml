@@ -1,11 +1,58 @@
-<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html">
 <h:head>
-  <title>Facelet Title</title>
+    <meta charset="UTF-8" />
+    <title>Like Hero To Zero – CO₂-Emissionen</title>
+
+    <!-- Externe CSS-Datei -->
+    <h:outputStylesheet library="css" name="style.css" />
 </h:head>
+
 <h:body>
-  Hallo Welt!
+
+    <header>
+        <h1>Like Hero To Zero</h1>
+        <p>Transparente Daten für eine nachhaltige Zukunft</p>
+    </header>
+
+    <main>
+        <h2>Willkommen auf der Seite zur Einsicht von CO₂-Emissionen</h2>
+
+        <p>
+            Diese Webanwendung stellt öffentlich zugängliche Daten zu weltweiten
+            CO₂-Emissionen bereit. Ziel des Projekts <strong>„Like Hero To Zero“</strong>
+            ist es, einen einfachen und transparenten Zugang zu aktuellen
+            Emissionsdaten zu ermöglichen.
+        </p>
+
+        <p>
+            Nachfolgend werden die jeweils aktuellsten im Datensatz verfügbaren
+            CO₂-Emissionswerte angezeigt. Die Daten stammen aus anerkannten,
+            öffentlich zugänglichen Quellen und werden kontinuierlich von
+            Wissenschaftlerinnen und Wissenschaftlern gepflegt und aktualisiert.
+        </p>
+
+        <p>
+            Das Projekt richtet sich an umweltpolitisch interessierte Bürgerinnen
+            und Bürger und soll eine fundierte Grundlage für Diskussionen rund um
+            Klimaschutz und Nachhaltigkeit schaffen.
+        </p>
+
+        <p>
+		 <h:form>
+		<h:commandLink action="emissions.xhtml">
+		    Aktuelle CO₂-Emissionen anzeigen
+		</h:commandLink>
+
+		</h:form>
+
+        </p>
+    </main>
+
+    <footer>
+        © 2026 – Like Hero To Zero | Nachhaltigkeitsprojekt
+    </footer>
+
 </h:body>
 </html>
-
