@@ -16,15 +16,23 @@ public class Emission {
     private Country country;
 
     @Column(nullable = false)
-    private int year;
+    private Integer year;
 
-    @Column(name = "co2_kt", nullable = false, precision = 15, scale = 3)
+
+    @Column(name = "co2_kt", precision = 15, scale = 3)
     private BigDecimal co2Kt;
+
+
+    @Column(name = "co2_kt_pending", precision = 15, scale = 3)
+    private BigDecimal co2KtPending;
+
+    @Column(nullable = false, length = 20)
+    private String status;
 
     @Column(nullable = false, length = 20)
     private String unit;
 
-    // Getter / Setter
+    // ===== Getter / Setter =====
 
     public Long getId() {
         return id;
@@ -38,12 +46,21 @@ public class Emission {
         this.country = country;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
+    }
+
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     public BigDecimal getCo2Kt() {
@@ -54,11 +71,21 @@ public class Emission {
         this.co2Kt = co2Kt;
     }
 
-    public String getUnit() {
-        return unit;
+    public BigDecimal getCo2KtPending() {
+        return co2KtPending;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setCo2KtPending(BigDecimal co2KtPending) {
+        this.co2KtPending = co2KtPending;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+ 
 }

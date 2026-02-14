@@ -39,15 +39,20 @@
             Klimaschutz und Nachhaltigkeit schaffen.
         </p>
 
-        <p>
-		 <h:form>
-		<h:commandLink action="emissions.xhtml">
-		    Aktuelle CO₂-Emissionen anzeigen
-		</h:commandLink>
+        <h:form>
+            <!-- Öffentlicher Zugang -->
+            <h:commandLink action="emissions.xhtml">
+                Aktuelle CO₂-Emissionen anzeigen
+            </h:commandLink>
 
-		</h:form>
+            <br/><br/>
 
-        </p>
+            <!-- Backend-Zugang (Login erforderlich) -->
+            <h:commandLink action="login.xhtml">
+                Login für Wissenschaftler:innen &amp; Herausgeber:innen
+            </h:commandLink>
+        </h:form>
+
     </main>
 
     <footer>

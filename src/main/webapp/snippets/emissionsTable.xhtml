@@ -1,0 +1,74 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<p:dataTable id="emissionTable"
+		value="#{emissionsController.latestEmissions}" var="e"
+		stripedRows="true" paginator="true" rows="10">
+
+		<p:column headerText="Land">
+            #{e.country.name}
+        </p:column>
+
+		<p:column headerText="Jahr">
+            #{e.year}
+        </p:column>
+
+		<p:column headerText="CO₂-Emissionen">
+            #{e.co2Kt} #{e.unit}
+        </p:column>
+
+		<!-- Status und Pending -->
+		<p:column headerText="Status" rendered="#{showBackendColumns}">#{e.status}</p:column>
+
+		<p:column headerText="CO₂ (pending)" rendered="#{showBackendColumns}">#{e.co2KtPending}</p:column>
+
+		<!-- Todo: Vereinfachen!!  -->
+
+		<!-- Nur im Backend-Modus sichtbar -->
+
+		<!--
+	    Bearbeitungs-Button pro Tabellenzeile
+	
+	    icon:
+	        - PrimeFaces-Icon (Stift), signalisiert „Datensatz bearbeiten“
+	
+	    process="@this":
+	        - Es wird ausschließlich dieser Button verarbeitet
+	        - Verhindert unnötige Validierung/Verarbeitung der gesamten Tabelle
+	
+	    update=":backendForm:editDialog":
+	        - Aktualisiert den Bearbeitungsdialog per Ajax
+	        - Absolute Client-ID (beginnend mit :)
+	        - Notwendig, damit die im Backend gesetzte selectedEmission
+	          im Dialog neu gerendert wird
+	
+	    oncomplete="PF('editDialog').show()":
+	        - JavaScript-Callback nach erfolgreichem Ajax-Request
+	        - Öffnet den Dialog erst, NACHDEM der Server fertig ist
+	-->
+		<p:column headerText="Bearbeitung" rendered="#{showEditColumn}">
+			<p:commandButton icon="pi pi-pencil" process="@this"
+				update=":backendForm:editDialog"
+				actionListener="#{emissionsController.selectEmission(e)}"
+				oncomplete="PF('editDialog').show()" />
+		</p:column>
+
+		<!--
+	    Validierungs-Button (nur für Herausgeber:innen)
+	
+	    - Sichtbar nur, wenn showValidationColumn = true
+	    - Öffnet denselben Dialog, später mit Freigabe-Logik
+	    - Dient zur Prüfung und Freigabe von Pending-Änderungen
+	-->
+		<p:column headerText="Validation" rendered="#{showValidationColumn}">
+			<p:commandButton icon="pi pi-check" process="@this"
+				update=":backendForm:editDialog"
+				actionListener="#{emissionsController.selectEmission(e)}"
+				oncomplete="PF('editDialog').show()" />
+		</p:column>
+
+	</p:dataTable>
+
+</ui:composition>
