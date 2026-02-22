@@ -1,6 +1,6 @@
 package controller;
 
-import config.UserStore;
+import dao.UserDAO;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,12 +15,9 @@ public class AuthController implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Inject
-    private UserStore userStore;
+    private UserDAO userDAO;
 
-    // Eingaben aus login.xhtml
     private User loginUser = new User();
-
-    // eingeloggter User in der Session
     private User currentUser;
 
     public User getLoginUser() {
@@ -47,18 +44,19 @@ public class AuthController implements Serializable {
         return isLoggedIn() && currentUser.getRole() == User.Role.EDITOR;
     }
 
-    /**
-     * Login + Navigation über Rückgabewert
-     */
     public String login() {
-        for (User u : userStore.getUsers()) {
-            if (u.equals(loginUser)) {
-                currentUser = u;
-                loginUser = new User(); // Felder leeren
-                return "backend.xhtml?faces-redirect=true";
-            }
+
+        User user = userDAO.findByUsernameAndPassword(
+                loginUser.getUsername(),
+                loginUser.getPassword()
+        );
+
+        if (user != null) {
+            currentUser = user;
+            loginUser = new User();
+            return "backend.xhtml?faces-redirect=true";
         }
-        // Login fehlgeschlagen -> auf login.xhtml bleiben
+
         return null;
     }
 
@@ -68,13 +66,28 @@ public class AuthController implements Serializable {
         return "index.xhtml?faces-redirect=true";
     }
 
-    /**
-     * ViewAction-Guard: wenn nicht eingeloggt -> Login
-     */
     public String ensureLoggedIn() {
         if (!isLoggedIn()) {
             return "login.xhtml?faces-redirect=true";
         }
         return null;
+    }
+
+    public String getWelcomeText() {
+
+        if (!isLoggedIn()) {
+            return "";
+        }
+
+        switch (currentUser.getGender()) {
+            case MALE:
+                return "Willkommen, Herr " + currentUser.getName();
+            case FEMALE:
+                return "Willkommen, Frau " + currentUser.getName();
+            case DIVERS:
+                return "Willkommen, " + currentUser.getFirstname() + " Divers";
+            default:
+                return "Willkommen, " + currentUser.getFirstname();
+        }
     }
 }

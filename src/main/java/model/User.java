@@ -1,26 +1,79 @@
 package model;
 
+import jakarta.persistence.*;
 import java.io.Serializable;
-import java.util.Objects;
 
+@Entity
+@Table(name = "users")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public enum Gender {
+        MALE,
+        FEMALE,
+        DIVERS
+    }
 
     public enum Role {
         SCIENTIST,
         EDITOR
     }
 
-    private String username;
-    private String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String firstname;
+
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Enumerated(EnumType.STRING)
     private Role role;
 
-    public User() {}
+    @Column(unique = true)
+    private String username;
 
-    public User(String username, String password, Role role) {
-        this.username = username;
-        this.password = password;
+    private String password;
+
+    // ===== Getter & Setter =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -38,31 +91,5 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    /**
-     * Login-Check: username + password müssen matchen.
-     * Rolle spielt dabei keine Rolle (die kommt aus dem gefundenen User).
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        User user = (User) o;
-        return Objects.equals(username, user.username)
-                && Objects.equals(password, user.password);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(username, password);
     }
 }

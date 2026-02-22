@@ -138,4 +138,37 @@ public class EmissionDAO {
         System.out.println("=== DAO: findById() === ID=" + id);
         return em.find(Emission.class, id);
     }
+    
+    
+    /**
+     * Alle Emissionswerte eines Landes (aufsteigend sortiert)
+     */
+    public List<Emission> findByCountry(Long countryId) {
+
+        return em.createQuery(
+            "SELECT e FROM Emission e " +
+            "WHERE e.country.id = :cid " +
+            "ORDER BY e.year",
+            Emission.class)
+            .setParameter("cid", countryId)
+            .getResultList();
+    }
+
+    /**
+     * Neuesten Datensatz eines Landes
+     */
+    public Emission findLatestByCountry(Long countryId) {
+
+        List<Emission> list = em.createQuery(
+            "SELECT e FROM Emission e " +
+            "WHERE e.country.id = :cid " +
+            "ORDER BY e.year DESC",
+            Emission.class)
+            .setParameter("cid", countryId)
+            .setMaxResults(1)
+            .getResultList();
+
+        return list.isEmpty() ? null : list.get(0);
+    }
+
 }

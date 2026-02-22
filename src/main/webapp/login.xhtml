@@ -18,13 +18,17 @@
 
         <p:messages id="msgs" showDetail="true" closable="true"/>
 
-        <p:panelGrid columns="2" columnClasses="label,value" styleClass="ui-fluid">
+        <p:panelGrid columns="2" styleClass="ui-fluid">
 
             <p:outputLabel for="username" value="Benutzername"/>
-            <p:inputText id="username" value="#{authController.loginUser.username}" required="true"/>
+            <p:inputText id="username"
+                         value="#{authController.loginUser.username}"
+                         required="true"/>
 
             <p:outputLabel for="password" value="Passwort"/>
-            <p:password id="password" value="#{authController.loginUser.password}" required="true"/>
+            <p:password id="password"
+                        value="#{authController.loginUser.password}"
+                        required="true"/>
 
         </p:panelGrid>
 

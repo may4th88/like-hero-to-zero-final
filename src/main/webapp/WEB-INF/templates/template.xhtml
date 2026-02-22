@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>
+        <ui:insert name="title">Like Hero To Zero debug</ui:insert>
+    </title>
+
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- Navigation -->
+    <p:menubar>
+        <p:menuitem value="Startseite" outcome="/index.xhtml" icon="pi pi-home"/>
+        <p:menuitem value="CO₂-Emissionen" outcome="/emissions.xhtml" icon="pi pi-chart-line"/>
+        <p:menuitem value="Login" outcome="/login.xhtml" icon="pi pi-user"/>
+
+        <p:submenu label="Rechtliches" icon="pi pi-info-circle">
+            <p:menuitem value="Impressum" outcome="/impressum.xhtml"/>
+            <p:menuitem value="Datenschutz" outcome="/datenschutz.xhtml"/>
+        </p:submenu>
+    </p:menubar>
+
+    <!-- Header -->
+    <header style="padding:20px;">
+        <h1>Like Hero To Zero</h1>
+        <p>Transparente Daten für eine nachhaltige Zukunft</p>
+    </header>
+
+    <!-- Content -->
+    <main style="padding:20px; max-width:1000px; margin:auto;">
+        <ui:insert name="content"/>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align:center; padding:20px; margin-top:40px;">
+        © 2026 – Like Hero To Zero | Nachhaltigkeitsprojekt
+    </footer>
+
+</h:body>
+</html>
