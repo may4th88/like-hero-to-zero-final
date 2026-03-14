@@ -1,5 +1,7 @@
 package controller;
 
+import org.primefaces.PrimeFaces;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -101,8 +103,8 @@ public class EmissionsController implements Serializable {
             return;
         }
 
-        latestSelectedEmission = emissionDAO.findLatestByCountry(selectedCountryId);
-        emissionsOfCountry = emissionDAO.findByCountry(selectedCountryId);
+        latestSelectedEmission = emissionDAO.findLatestEmissionByCountry(selectedCountryId);
+        emissionsOfCountry = emissionDAO.findEmissionHistoryByCountry(selectedCountryId);
 
         createLineModel();
     }
@@ -203,31 +205,34 @@ public class EmissionsController implements Serializable {
 
     public void saveEmission() {
 
-        System.out.println("=== saveEmission() START ===");
+        FacesContext context = FacesContext.getCurrentInstance();
 
-        if (selectedEmission == null) {
-            System.out.println("!!! selectedEmission ist NULL -> Abbruch");
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    "Fehler", "Kein Datensatz ausgewählt."));
-            return;
-        }
-
+        // Validierung: Pending-Wert muss eingegeben sein
         if (selectedEmission.getCo2KtPending() == null) {
-            FacesContext.getCurrentInstance().addMessage(null,
+
+            context.addMessage("backendForm:pendingInput",
                 new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "Fehler", "Bitte einen neuen CO₂-Wert eingeben."));
+
+            context.validationFailed();
+            PrimeFaces.current().ajax().addCallbackParam("validationFailed", true);
+
             return;
         }
 
+        // Status auf PENDING setzen
         selectedEmission.setStatus("PENDING");
+
+        // Änderung speichern
         emissionDAO.update(selectedEmission);
 
-        FacesContext.getCurrentInstance().addMessage(null,
+        // Globale Erfolgsmeldung
+        context.addMessage(null,
             new FacesMessage(FacesMessage.SEVERITY_INFO,
                 "Änderung gespeichert",
                 "Datensatz wurde als PENDING markiert."));
 
+        // Tabelle neu laden
         latestEmissions = null;
     }
 

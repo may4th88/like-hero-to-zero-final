@@ -54,7 +54,7 @@ public class AuthController implements Serializable {
         if (user != null) {
             currentUser = user;
             loginUser = new User();
-            return "backend.xhtml?faces-redirect=true";
+            return "backend.xhtml";
         }
 
         return null;

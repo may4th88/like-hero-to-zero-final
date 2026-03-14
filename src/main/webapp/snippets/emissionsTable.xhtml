@@ -4,7 +4,7 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 	<!--  <p:dataTable id="emissionTable" -->
-	<p:dataTable value="#{emissionsController.latestEmissions}" var="e"
+	<p:dataTable id="emissionTable" value="#{emissionsController.latestEmissions}" var="e"
 		stripedRows="true" paginator="true" rows="10">
 
 		<p:column headerText="Land">

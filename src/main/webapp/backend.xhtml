@@ -5,7 +5,6 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui">
 
-<!-- ✅ RICHTIG platziert -->
 <f:metadata>
 	<f:viewAction action="#{authController.ensureLoggedIn}" />
 </f:metadata>
@@ -19,123 +18,104 @@
 
 	<h2>#{authController.welcomeText}</h2>
 
-
-	<!-- Logout -->
 	<h:form>
 		<p:commandButton value="Logout" icon="pi pi-sign-out"
 			action="#{authController.logout}" ajax="false" />
 	</h:form>
 
-	<!-- Menü -->
 	<h:form id="menuForm">
 		<p:commandButton value="CO₂-Daten anzeigen" icon="pi pi-table"
 			action="#{backendController.showEmissionsTable}" update="backendForm" />
 	</h:form>
 
-	<!-- Hauptbereich -->
 	<h:form id="backendForm">
 
-		<!-- Neue Daten -->
+		<p:messages id="pageMsgs"
+			showDetail="true"
+			globalOnly="true"
+			autoUpdate="true"
+			closable="true" />
+
 		<p:commandButton value="Neue Daten hinzufügen" icon="pi pi-plus"
 			actionListener="#{emissionsController.prepareNewEmission}"
-			update=":backendForm:editDialog" oncomplete="PF('editDialog').show()"
-			rendered="#{authController.scientist}" style="margin-bottom:15px" />
+			update=":backendForm:dialogContent"
+			oncomplete="PF('editDialog').show()"
+			rendered="#{authController.scientist}"
+			style="margin-bottom:15px" />
 
-					<!-- 
-		    WICHTIGER HINWEIS ZUM LAYOUT:
-		
-		    Ursprünglich wurde hier ein <p:panelGrid> mit styleClass="ui-fluid"
-		    und dem Standard-Layout verwendet. PrimeFaces aktiviert dadurch
-		    automatisch das responsive Grid-System (ui-grid, ui-g-* Klassen).
-		
-		    In Kombination mit rendered-Attributen führte dies dazu, dass
-		    leere Grid-Zellen erzeugt wurden. Das Resultat war eine visuell
-		    versetzte Darstellung der Label- und Input-Felder im Dialog.
-		
-		    Lösung:
-		    Das Layout wurde auf layout="tabular" umgestellt.
-		    Dadurch wird ein klassisches HTML-Tabellenlayout verwendet,
-		    welches eine stabile 2-Spalten-Struktur garantiert.
-		
-		    styleClass="ui-fluid" wurde bewusst entfernt,
-		    um das PrimeFaces Grid-System zu deaktivieren.
-		-->
-		<!-- Dialog -->
-		<p:dialog id="editDialog"
-          widgetVar="editDialog"
-          modal="true"
-          closable="true"
-          width="600"
-          header="#{emissionsController.newMode
+		<p:dialog id="editDialog" widgetVar="editDialog" modal="true"
+			closable="true" width="600"
+			header="#{emissionsController.newMode
                        ? 'Neue CO₂-Daten hinzufügen'
                        : (authController.scientist
                            ? 'CO₂-Daten bearbeiten'
                            : 'CO₂-Daten validieren')}">
 
-    <p:messages id="dlgMsgs" />
+			<h:panelGroup id="dialogContent" layout="block">
 
-    <p:panelGrid columns="2"
-                 layout="tabular"
-                 style="width:100%"
-                 columnClasses="labelCol,valueCol">
+				<p:messages id="dlgMsgs"
+					showDetail="true"
+					closable="true" />
 
-        <p:outputLabel value="Land:" />
-        <p:selectOneMenu value="#{emissionsController.selectedCountryId}"
-                         disabled="#{!emissionsController.newMode}">
-            <f:selectItems value="#{emissionsController.countries}"
-                           var="c"
-                           itemValue="#{c.id}"
-                           itemLabel="#{c.name}" />
-        </p:selectOneMenu>
+				<p:panelGrid columns="2" layout="tabular" style="width:100%"
+					columnClasses="labelCol,valueCol">
 
-        <p:outputLabel value="Jahr:" />
-        <p:inputText value="#{emissionsController.selectedEmission.year}"
-                     disabled="#{!emissionsController.newMode}">
-            <f:convertNumber integerOnly="true" />
-        </p:inputText>
+					<p:outputLabel value="Land:" />
+					<p:selectOneMenu value="#{emissionsController.selectedCountryId}"
+						disabled="#{!emissionsController.newMode}">
+						<f:selectItems value="#{emissionsController.countries}" var="c"
+							itemValue="#{c.id}" itemLabel="#{c.name}" />
+					</p:selectOneMenu>
 
-        <p:outputLabel value="Aktueller CO₂-Wert:" />
-        <p:inputNumber value="#{emissionsController.selectedEmission.co2Kt}"
-                       readonly="true" />
+					<p:outputLabel value="Jahr:" />
+					<p:inputText value="#{emissionsController.selectedEmission.year}"
+						disabled="#{!emissionsController.newMode}">
+						<f:convertNumber integerOnly="true" />
+					</p:inputText>
 
-        <p:outputLabel value="Neuer / Pending CO₂-Wert:" />
-        <p:inputNumber value="#{emissionsController.selectedEmission.co2KtPending}"
-                       readonly="#{authController.editor}" />
+					<p:outputLabel value="Aktueller CO₂-Wert:" />
+					<p:inputNumber value="#{emissionsController.selectedEmission.co2Kt}"
+						readonly="true" />
 
-    </p:panelGrid>
+					<p:outputLabel for="pendingInput" value="Neuer / Pending CO₂-Wert:" />
+					<h:panelGroup layout="block">
+						<p:inputNumber id="pendingInput"
+							value="#{emissionsController.selectedEmission.co2KtPending}"
+							readonly="#{authController.editor}" />
+						<p:message for="pendingInput" display="text" />
+					</h:panelGroup>
 
-    <p:separator />
+				</p:panelGrid>
 
-    <p:commandButton value="Speichern"
-                     icon="pi pi-save"
-                     action="#{emissionsController.save}"
-                     process="@form"
-                     update="backendForm:emissionsPanel backendForm:editDialog"
-                     rendered="#{authController.scientist}"
-                     oncomplete="if (!args.validationFailed) PF('editDialog').hide();" />
+				<p:separator />
 
-    <p:commandButton value="Validieren"
-                     icon="pi pi-check"
-                     action="#{emissionsController.validateEmission}"
-                     process="@form"
-                     update="backendForm:emissionsPanel backendForm:editDialog"
-                     rendered="#{authController.editor}"
-                     oncomplete="PF('editDialog').hide();" />
+				<p:commandButton
+					value="Speichern"
+					action="#{emissionsController.save}"
+					process="@form"
+					update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
+					rendered="#{authController.scientist}"
+					oncomplete="if (args &amp;&amp; args.validationFailed) { PF('editDialog').show(); } else { PF('editDialog').hide(); }" />
 
-</p:dialog>
-		
-		
-		
-	
+				<p:commandButton
+					value="Validieren"
+					icon="pi pi-check"
+					action="#{emissionsController.validateEmission}"
+					process="@form"
+					update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
+					rendered="#{authController.editor}"
+					oncomplete="PF('editDialog').hide();" />
 
-		<!-- Tabelle -->
+			</h:panelGroup>
+
+		</p:dialog>
+
 		<h:panelGroup id="emissionsPanel"
 			rendered="#{backendController.showEmissions}">
 
 			<ui:include src="/snippets/emissionsTable.xhtml">
 				<ui:param name="showEditColumn" value="#{authController.scientist}" />
-				<ui:param name="showValidationColumn"
-					value="#{authController.editor}" />
+				<ui:param name="showValidationColumn" value="#{authController.editor}" />
 				<ui:param name="showBackendColumns"
 					value="#{authController.scientist or authController.editor}" />
 			</ui:include>

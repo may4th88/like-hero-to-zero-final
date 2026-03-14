@@ -23,9 +23,11 @@ public class EmissionDAO {
 
         List<Emission> result = em.createQuery(
             "SELECT e FROM Emission e " +
+            "JOIN FETCH e.country c " +
             "WHERE e.year = (" +
-            "  SELECT MAX(e2.year) FROM Emission e2 WHERE e2.country = e.country" +
-            ") ORDER BY e.country.name",
+            "   SELECT MAX(e2.year) FROM Emission e2 WHERE e2.country.id = e.country.id" +
+            ") " +
+            "ORDER BY c.name",
             Emission.class
         ).getResultList();
 
@@ -143,7 +145,7 @@ public class EmissionDAO {
     /**
      * Alle Emissionswerte eines Landes (aufsteigend sortiert)
      */
-    public List<Emission> findByCountry(Long countryId) {
+    public List<Emission> findEmissionHistoryByCountry(Long countryId) {
 
         return em.createQuery(
             "SELECT e FROM Emission e " +
@@ -157,7 +159,7 @@ public class EmissionDAO {
     /**
      * Neuesten Datensatz eines Landes
      */
-    public Emission findLatestByCountry(Long countryId) {
+    public Emission findLatestEmissionByCountry(Long countryId) {
 
         List<Emission> list = em.createQuery(
             "SELECT e FROM Emission e " +
