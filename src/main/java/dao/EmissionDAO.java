@@ -1,11 +1,11 @@
 package dao;
 
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import java.util.List;
-
 import model.Emission;
 
 @ApplicationScoped
@@ -18,159 +18,118 @@ public class EmissionDAO {
      * Liefert pro Land den jeweils aktuellsten Emissionsdatensatz.
      */
     public List<Emission> findLatestEmissionsPerCountry() {
-
-        System.out.println("=== DAO: findLatestEmissionsPerCountry() ===");
-
-        List<Emission> result = em.createQuery(
+        return em.createQuery(
             "SELECT e FROM Emission e " +
             "JOIN FETCH e.country c " +
             "WHERE e.year = (" +
-            "   SELECT MAX(e2.year) FROM Emission e2 WHERE e2.country.id = e.country.id" +
+            "   SELECT MAX(e2.year) FROM Emission e2 " +
+            "   WHERE e2.country.id = e.country.id" +
             ") " +
             "ORDER BY c.name",
             Emission.class
         ).getResultList();
-
-        System.out.println("Gefundene Datensätze: " + result.size());
-
-        return result;
     }
 
     /**
-     * Update bestehender Datensatz
+     * Aktualisiert einen bestehenden Emissionsdatensatz.
      */
     public Emission update(Emission emission) {
-
-        System.out.println("=== DAO: update() ===");
-        System.out.println("ID: " + emission.getId());
-        System.out.println("Status: " + emission.getStatus());
-
-        EntityTransaction tx = em.getTransaction();
+        EntityTransaction transaction = em.getTransaction();
 
         try {
-            tx.begin();
-            Emission merged = em.merge(emission);
-            tx.commit();
+            transaction.begin();
+            Emission mergedEmission = em.merge(emission);
+            transaction.commit();
 
-            System.out.println("Update erfolgreich committed.");
-
-            return merged;
-
+            return mergedEmission;
         } catch (RuntimeException e) {
-
-            System.out.println("!!! FEHLER BEIM UPDATE !!!");
-            e.printStackTrace();
-
-            if (tx.isActive()) {
-                tx.rollback();
-                System.out.println("Rollback durchgeführt.");
-            }
-
+            rollback(transaction);
             throw e;
         }
     }
 
     /**
-     * Prüfen ob Land + Jahr bereits existiert
+     * Prüft, ob für ein Land und ein Jahr bereits ein Emissionsdatensatz existiert.
      */
     public boolean existsByCountryAndYear(Long countryId, int year) {
-
-        System.out.println("=== DAO: existsByCountryAndYear() ===");
-        System.out.println("CountryId: " + countryId);
-        System.out.println("Year: " + year);
-
         Long count = em.createQuery(
-            "SELECT COUNT(e) FROM Emission e WHERE e.country.id = :cid AND e.year = :year",
-            Long.class)
-            .setParameter("cid", countryId)
+            "SELECT COUNT(e) FROM Emission e " +
+            "WHERE e.country.id = :countryId AND e.year = :year",
+            Long.class
+        )
+            .setParameter("countryId", countryId)
             .setParameter("year", year)
             .getSingleResult();
-
-        System.out.println("Gefundene Anzahl: " + count);
 
         return count > 0;
     }
 
     /**
-     * Neuer Datensatz
+     * Legt einen neuen Emissionsdatensatz an.
      */
     public Emission create(Emission emission) {
-
-        System.out.println("=== DAO: create() ===");
-        System.out.println("Country: " + 
-            (emission.getCountry() != null ? emission.getCountry().getName() : "NULL"));
-        System.out.println("Year: " + emission.getYear());
-        System.out.println("co2KtPending: " + emission.getCo2KtPending());
-        System.out.println("Status: " + emission.getStatus());
-        System.out.println("Unit: " + emission.getUnit());
-
-        EntityTransaction tx = em.getTransaction();
+        EntityTransaction transaction = em.getTransaction();
 
         try {
-
-            System.out.println("Transaktion gestartet...");
-            tx.begin();
-
+            transaction.begin();
             em.persist(emission);
-
-            System.out.println("Persist ausgeführt...");
-
-            tx.commit();
-
-            System.out.println("Commit erfolgreich.");
-            System.out.println("Neue ID: " + emission.getId());
+            transaction.commit();
 
             return emission;
-
         } catch (RuntimeException e) {
-
-            System.out.println("!!! FEHLER BEIM CREATE !!!");
-            e.printStackTrace();
-
-            if (tx.isActive()) {
-                tx.rollback();
-                System.out.println("Rollback durchgeführt.");
-            }
-
+            rollback(transaction);
             throw e;
         }
     }
 
+    /**
+     * Sucht einen Emissionsdatensatz anhand seiner Datenbank-ID.
+     */
     public Emission findById(Long id) {
-        System.out.println("=== DAO: findById() === ID=" + id);
+        if (id == null) {
+            return null;
+        }
+
         return em.find(Emission.class, id);
     }
-    
-    
+
     /**
-     * Alle Emissionswerte eines Landes (aufsteigend sortiert)
+     * Liefert alle Emissionsdatensätze eines Landes aufsteigend nach Jahr sortiert.
      */
     public List<Emission> findEmissionHistoryByCountry(Long countryId) {
-
         return em.createQuery(
             "SELECT e FROM Emission e " +
-            "WHERE e.country.id = :cid " +
+            "WHERE e.country.id = :countryId " +
             "ORDER BY e.year",
-            Emission.class)
-            .setParameter("cid", countryId)
+            Emission.class
+        )
+            .setParameter("countryId", countryId)
             .getResultList();
     }
 
     /**
-     * Neuesten Datensatz eines Landes
+     * Liefert den neuesten Emissionsdatensatz eines Landes.
      */
     public Emission findLatestEmissionByCountry(Long countryId) {
-
-        List<Emission> list = em.createQuery(
+        List<Emission> emissions = em.createQuery(
             "SELECT e FROM Emission e " +
-            "WHERE e.country.id = :cid " +
+            "WHERE e.country.id = :countryId " +
             "ORDER BY e.year DESC",
-            Emission.class)
-            .setParameter("cid", countryId)
+            Emission.class
+        )
+            .setParameter("countryId", countryId)
             .setMaxResults(1)
             .getResultList();
 
-        return list.isEmpty() ? null : list.get(0);
+        return emissions.isEmpty() ? null : emissions.get(0);
     }
 
+    /**
+     * Setzt eine aktive Transaktion im Fehlerfall zurück.
+     */
+    private void rollback(EntityTransaction transaction) {
+        if (transaction.isActive()) {
+            transaction.rollback();
+        }
+    }
 }

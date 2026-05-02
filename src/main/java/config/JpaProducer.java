@@ -13,50 +13,41 @@ import jakarta.persistence.Persistence;
 @ApplicationScoped
 public class JpaProducer {
 
-    private EntityManagerFactory emf;
+    private EntityManagerFactory entityManagerFactory;
 
     /**
-     * Wird einmal beim Start der Anwendung ausgeführt.
-     * Erstellt die EntityManagerFactory (thread-safe).
+     * Initialisiert die EntityManagerFactory einmalig beim Start der Anwendung.
      */
     @PostConstruct
     public void init() {
-        emf = Persistence.createEntityManagerFactory("likeHeroToZeroPU");
-        System.out.println("EntityManagerFactory initialisiert");
+        entityManagerFactory = Persistence.createEntityManagerFactory("likeHeroToZeroPU");
     }
 
     /**
-     * Pro HTTP-Request wird ein neuer EntityManager erzeugt.
-     * Dadurch wird kein EntityManager zwischen parallelen Requests geteilt.
+     * Erzeugt pro HTTP-Request einen eigenen EntityManager.
      */
     @Produces
     @RequestScoped
     public EntityManager produceEntityManager() {
-        EntityManager em = emf.createEntityManager();
-        System.out.println("EntityManager erzeugt: " + System.identityHashCode(em));
-        return em;
+        return entityManagerFactory.createEntityManager();
     }
 
     /**
-     * Wird am Ende des Request-Scopes automatisch aufgerufen.
-     * Schließt den EntityManager sauber.
+     * Schließt den EntityManager am Ende des Request-Scopes.
      */
-    public void close(@Disposes EntityManager em) {
-        if (em != null && em.isOpen()) {
-            System.out.println("EntityManager geschlossen: " + System.identityHashCode(em));
-            em.close();
+    public void closeEntityManager(@Disposes EntityManager entityManager) {
+        if (entityManager != null && entityManager.isOpen()) {
+            entityManager.close();
         }
     }
 
     /**
-     * Wird beim Stoppen der Anwendung ausgeführt.
-     * Schließt die EntityManagerFactory sauber.
+     * Schließt die EntityManagerFactory beim Beenden der Anwendung.
      */
     @PreDestroy
     public void shutdown() {
-        if (emf != null && emf.isOpen()) {
-            emf.close();
-            System.out.println("EntityManagerFactory geschlossen");
+        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+            entityManagerFactory.close();
         }
     }
 }

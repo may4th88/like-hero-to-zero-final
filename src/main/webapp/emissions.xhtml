@@ -1,88 +1,85 @@
 <ui:composition template="/WEB-INF/templates/template.xhtml"
-	xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:p="http://primefaces.org/ui">
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
 
-	<ui:define name="title">
+    <ui:define name="title">
         CO₂-Emissionen
     </ui:define>
 
-	<ui:define name="content">
+    <ui:define name="content">
 
+        <h1>Aktuelle CO₂-Emissionen</h1>
 
-		<h1>Aktuelle CO₂-Emissionen</h1>
+        <p>
+            Übersicht der jeweils aktuellsten CO₂-Emissionswerte pro Land.
+        </p>
 
-		<p>Übersicht der jeweils aktuellsten CO₂-Emissionswerte pro Land.</p>
+        <h2>Welche Staatsbürgerschaft besitzen Sie?</h2>
 
-		<h2>Welche Staatsbürgerschaft besitzen Sie?</h2>
-		<div class="card">
+        <div class="card">
+            <h:form id="countryForm">
 
-			<h:form id="countryForm">
+                <p:growl id="msgs"
+                    showDetail="true"
+                    skipDetailIfEqualsSummary="true" />
 
-				<p:growl id="msgs" showDetail="true"
-					skipDetailIfEqualsSummary="true" />
+                <p:panel header="Land auswählen"
+                    style="margin-bottom: 10px;">
 
-				<p:panel header="Select a Location" style="margin-bottom:10px;">
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <p:outputLabel for="country" value="Land:" />
 
-					<h:panelGrid columns="2" cellpadding="5">
-						<p:outputLabel for="country" value="Country: " />
+                        <p:selectOneMenu id="country"
+                            value="#{emissionsController.selectedCountryId}">
+                            <f:selectItem itemLabel="Land auswählen"
+                                itemValue="#{null}" />
+                            <f:selectItems value="#{emissionsController.countries}"
+                                var="c"
+                                itemLabel="#{c.name}"
+                                itemValue="#{c.id}" />
+                        </p:selectOneMenu>
+                    </h:panelGrid>
 
-						<p:selectOneMenu id="country"
-							value="#{emissionsController.selectedCountryId}">
-							<f:selectItem itemLabel="Select Country" itemValue="#{null}" />
-							<f:selectItems value="#{emissionsController.countries}" var="c"
-								itemLabel="#{c.name}" itemValue="#{c.id}" />
-						</p:selectOneMenu>
-					</h:panelGrid>
+                    <p:divider />
 
-					<p:divider />
+                    <p:commandButton value="Anzeigen"
+                        icon="pi pi-check"
+                        actionListener="#{emissionsController.loadCountryData}"
+                        update="countryPanel" />
 
-					<p:commandButton value="Submit"
-						actionListener="#{emissionsController.loadCountryData}"
-						update="countryPanel" icon="pi pi-check" />
+                </p:panel>
 
-				</p:panel>
+                <h:panelGroup id="countryPanel">
+                    <h:panelGroup rendered="#{not empty emissionsController.latestSelectedEmission}">
 
-				<!-- PANEL EXISTIERT IMMER -->
-				<h:panelGroup id="countryPanel" >
+                        <h3>#{emissionsController.latestSelectedEmission.country.name}</h3>
 
-					<!-- INHALT NUR BEI DATEN -->
-					<h:panelGroup
-						rendered="#{not empty emissionsController.latestSelectedEmission}">
+                        <p>
+                            Für das ausgewählte Land wurde
+                            <b>#{emissionsController.latestSelectedEmission.year}</b>
+                            ein Wert von
+                            <b>#{emissionsController.latestSelectedEmission.co2Value} Mio. t</b>
+                            registriert. Schauen Sie hier, wie sich die letzten Werte entwickelt haben:
+                        </p>
 
-						<h3>
-							#{emissionsController.latestSelectedEmission.country.name}</h3>
+                        <div class="card">
+                            <p:chart value="#{emissionsController.lineModel}"
+                                style="width: 100%; height: 400px;" />
+                        </div>
 
-						<p>
-							In deinem Land wurde <b>#{emissionsController.latestSelectedEmission.year}</b>
-							ein Wert von <b>#{emissionsController.latestSelectedEmission.co2Kt}
-								kt</b> registriert. Schaue hier wie sich die letzten Werte
-							entwickelt haben:
-						</p>
+                    </h:panelGroup>
+                </h:panelGroup>
 
-						<div class="card">
-							<p:chart value="#{emissionsController.lineModel}"
-								style="width:100%; height:400px;" />
-						</div>
+            </h:form>
+        </div>
 
-					</h:panelGroup>
+        <h:form>
+            <ui:include src="/snippets/emissionsTable.xhtml" />
+        </h:form>
 
-				</h:panelGroup>
+    </ui:define>
 
-			</h:form>
-
-		</div>
-
-
-		<h:form>
-			<ui:include src="/snippets/emissionsTable.xhtml">
-				<ui:param name="showEditColumn" value="false" />
-			</ui:include>
-		</h:form>
-
-
-	</ui:define>
 </ui:composition>
-

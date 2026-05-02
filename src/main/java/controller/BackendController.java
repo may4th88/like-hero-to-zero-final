@@ -9,12 +9,9 @@ import jakarta.inject.Named;
 @ViewScoped
 public class BackendController implements Serializable {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-    private boolean showEmissions = false;
+    private static final long serialVersionUID = 1L;
+
+    private boolean showEmissions;
 
     public void showEmissionsTable() {
         showEmissions = true;
@@ -24,4 +21,3 @@ public class BackendController implements Serializable {
         return showEmissions;
     }
 }
-

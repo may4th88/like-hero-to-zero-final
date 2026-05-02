@@ -1,128 +1,149 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:p="http://primefaces.org/ui">
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
 
 <f:metadata>
-	<f:viewAction action="#{authController.ensureLoggedIn}" />
+    <f:viewAction action="#{authController.ensureLoggedIn}" />
 </f:metadata>
 
 <h:head>
-	<meta charset="UTF-8" />
-	<title>Backend</title>
+    <meta charset="UTF-8" />
+    <title>Backend</title>
 </h:head>
 
 <h:body>
 
-	<h2>#{authController.welcomeText}</h2>
+    <h2>#{authController.welcomeText}</h2>
 
-	<h:form>
-		<p:commandButton value="Logout" icon="pi pi-sign-out"
-			action="#{authController.logout}" ajax="false" />
-	</h:form>
+    <h:form>
+        <p:commandButton value="Logout"
+            icon="pi pi-sign-out"
+            action="#{authController.logout}"
+            ajax="false" />
+    </h:form>
 
-	<h:form id="menuForm">
-		<p:commandButton value="CO₂-Daten anzeigen" icon="pi pi-table"
-			action="#{backendController.showEmissionsTable}" update="backendForm" />
-	</h:form>
+    <h:form id="menuForm">
+        <p:commandButton value="CO₂-Daten anzeigen"
+            icon="pi pi-table"
+            action="#{backendController.showEmissionsTable}"
+            update="backendForm" />
+    </h:form>
 
-	<h:form id="backendForm">
+    <h:form id="backendForm">
 
-		<p:messages id="pageMsgs"
-			showDetail="true"
-			globalOnly="true"
-			autoUpdate="true"
-			closable="true" />
+        <p:commandButton value="Neue Daten hinzufügen"
+            icon="pi pi-plus"
+            actionListener="#{emissionsController.prepareNewEmission}"
+            update=":backendForm:dialogContent"
+            oncomplete="PF('editDialog').show()"
+            rendered="#{authController.scientist}"
+            style="margin-bottom: 15px;" />
 
-		<p:commandButton value="Neue Daten hinzufügen" icon="pi pi-plus"
-			actionListener="#{emissionsController.prepareNewEmission}"
-			update=":backendForm:dialogContent"
-			oncomplete="PF('editDialog').show()"
-			rendered="#{authController.scientist}"
-			style="margin-bottom:15px" />
+        <p:messages id="pageMsgs"
+            showDetail="true"
+            globalOnly="true"
+            autoUpdate="true"
+            closable="true"
+            style="margin-bottom: 15px;" />
 
-		<p:dialog id="editDialog" widgetVar="editDialog" modal="true"
-			closable="true" width="600"
-			header="#{emissionsController.newMode
-                       ? 'Neue CO₂-Daten hinzufügen'
-                       : (authController.scientist
-                           ? 'CO₂-Daten bearbeiten'
-                           : 'CO₂-Daten validieren')}">
+        <p:dialog id="editDialog"
+            widgetVar="editDialog"
+            modal="true"
+            closable="true"
+            width="600"
+            header="#{emissionsController.newMode
+                ? 'Neue CO₂-Daten hinzufügen'
+                : (authController.scientist
+                    ? 'CO₂-Daten bearbeiten'
+                    : 'CO₂-Daten validieren')}">
 
-			<h:panelGroup id="dialogContent" layout="block">
+            <h:panelGroup id="dialogContent" layout="block">
 
-				<p:messages id="dlgMsgs"
-					showDetail="true"
-					closable="true" />
+                <p:messages id="dlgMsgs"
+                    showDetail="true"
+                    closable="true" />
 
-				<p:panelGrid columns="2" layout="tabular" style="width:100%"
-					columnClasses="labelCol,valueCol">
+                <p:panelGrid columns="2"
+                    layout="tabular"
+                    style="width: 100%;"
+                    columnClasses="labelCol,valueCol">
 
-					<p:outputLabel value="Land:" />
-					<p:selectOneMenu value="#{emissionsController.selectedCountryId}"
-						disabled="#{!emissionsController.newMode}">
-						<f:selectItems value="#{emissionsController.countries}" var="c"
-							itemValue="#{c.id}" itemLabel="#{c.name}" />
-					</p:selectOneMenu>
+                    <p:outputLabel value="Land:" />
+                    <p:selectOneMenu value="#{emissionsController.selectedCountryId}"
+                        disabled="#{!emissionsController.newMode}">
+                        <f:selectItems value="#{emissionsController.countries}"
+                            var="c"
+                            itemValue="#{c.id}"
+                            itemLabel="#{c.name}" />
+                    </p:selectOneMenu>
 
-					<p:outputLabel value="Jahr:" />
-					<p:inputText value="#{emissionsController.selectedEmission.year}"
-						disabled="#{!emissionsController.newMode}">
-						<f:convertNumber integerOnly="true" />
-					</p:inputText>
+                    <p:outputLabel value="Jahr:" />
+                    <p:inputText value="#{emissionsController.selectedEmission.year}"
+                        disabled="#{!emissionsController.newMode}"
+                        maxlength="4">
+                        <f:convertNumber pattern="0000" />
+                    </p:inputText>
 
-					<p:outputLabel value="Aktueller CO₂-Wert:" />
-					<p:inputNumber value="#{emissionsController.selectedEmission.co2Kt}"
-						readonly="true" />
+                    <p:outputLabel value="Aktueller CO₂-Wert:" />
+                    <p:inputNumber value="#{emissionsController.selectedEmission.co2Value}"
+                        readonly="true"
+                        decimalPlaces="3"
+                        decimalSeparator="."
+                        thousandSeparator="" />
 
-					<p:outputLabel for="pendingInput" value="Neuer / Pending CO₂-Wert:" />
-					<h:panelGroup layout="block">
-						<p:inputNumber id="pendingInput"
-							value="#{emissionsController.selectedEmission.co2KtPending}"
-							readonly="#{authController.editor}" />
-						<p:message for="pendingInput" display="text" />
-					</h:panelGroup>
+                    <p:outputLabel for="pendingInput"
+                        value="Neuer / Pending CO₂-Wert:" />
+                    <h:panelGroup layout="block">
+                        <p:inputNumber id="pendingInput"
+                            value="#{emissionsController.selectedEmission.co2ValuePending}"
+                            readonly="#{authController.editor}"
+                            decimalPlaces="3"
+                            decimalSeparator="."
+                            thousandSeparator="" />
+                        <p:message for="pendingInput" display="text" />
+                    </h:panelGroup>
 
-				</p:panelGrid>
+                </p:panelGrid>
 
-				<p:separator />
+                <p:separator />
 
-				<p:commandButton
-					value="Speichern"
-					action="#{emissionsController.save}"
-					process="@form"
-					update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
-					rendered="#{authController.scientist}"
-					oncomplete="if (args &amp;&amp; args.validationFailed) { PF('editDialog').show(); } else { PF('editDialog').hide(); }" />
+                <p:commandButton value="Speichern"
+                    action="#{emissionsController.save}"
+                    process="@form"
+                    update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
+                    rendered="#{authController.scientist}"
+                    oncomplete="if (args &amp;&amp; args.validationFailed) { PF('editDialog').show(); } else { PF('editDialog').hide(); }" />
 
-				<p:commandButton
-					value="Validieren"
-					icon="pi pi-check"
-					action="#{emissionsController.validateEmission}"
-					process="@form"
-					update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
-					rendered="#{authController.editor}"
-					oncomplete="PF('editDialog').hide();" />
+                <p:commandButton value="Validieren"
+                    icon="pi pi-check"
+                    action="#{emissionsController.validateEmission}"
+                    process="@form"
+                    update=":backendForm:pageMsgs :backendForm:dialogContent :backendForm:emissionsPanel"
+                    rendered="#{authController.editor}"
+                    oncomplete="PF('editDialog').hide();" />
 
-			</h:panelGroup>
+            </h:panelGroup>
 
-		</p:dialog>
+        </p:dialog>
 
-		<h:panelGroup id="emissionsPanel"
-			rendered="#{backendController.showEmissions}">
+        <h:panelGroup id="emissionsPanel"
+            rendered="#{backendController.showEmissions}">
 
-			<ui:include src="/snippets/emissionsTable.xhtml">
-				<ui:param name="showEditColumn" value="#{authController.scientist}" />
-				<ui:param name="showValidationColumn" value="#{authController.editor}" />
-				<ui:param name="showBackendColumns"
-					value="#{authController.scientist or authController.editor}" />
-			</ui:include>
+            <ui:include src="/snippets/emissionsTable.xhtml">
+                <ui:param name="showEditColumn"
+                    value="#{authController.scientist}" />
+                <ui:param name="showValidationColumn"
+                    value="#{authController.editor}" />
+                <ui:param name="showBackendColumns"
+                    value="#{authController.scientist or authController.editor}" />
+            </ui:include>
 
-		</h:panelGroup>
+        </h:panelGroup>
 
-	</h:form>
+    </h:form>
 
 </h:body>
 </html>

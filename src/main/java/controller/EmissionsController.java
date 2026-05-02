@@ -1,23 +1,19 @@
 package controller;
 
+import java.io.Serializable;
+import java.util.List;
+
 import org.primefaces.PrimeFaces;
 
-import jakarta.annotation.PostConstruct;
+import dao.CountryDAO;
+import dao.EmissionDAO;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.FacesContext;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.ArrayList;
-
-import dao.EmissionDAO;
-import dao.CountryDAO;
-import model.Emission;
 import model.Country;
-
+import model.Emission;
 
 @Named
 @ViewScoped
@@ -25,44 +21,39 @@ public class EmissionsController implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // ==============================
-    // DAO INJECTIONS
-    // ==============================
-
     @Inject
     private EmissionDAO emissionDAO;
 
     @Inject
     private CountryDAO countryDAO;
 
-    // ==============================
-    // TABELLEN-DATEN (Frontend)
-    // ==============================
-
     private List<Emission> latestEmissions;
+    private List<Country> countries;
+
+    private Long selectedCountryId;
+
+    private Emission latestSelectedEmission;
+    private List<Emission> emissionsOfCountry;
+    private String lineModel;
+
+    private Emission selectedEmission;
+    private boolean newMode;
 
     public List<Emission> getLatestEmissions() {
         if (latestEmissions == null) {
             latestEmissions = emissionDAO.findLatestEmissionsPerCountry();
-            System.out.println("latestEmissions null");
         }
+
         return latestEmissions;
     }
-
-    // ==============================
-    // LÄNDER (Dropdown)
-    // ==============================
-
-    private List<Country> countries;
 
     public List<Country> getCountries() {
         if (countries == null) {
             countries = countryDAO.findCountries();
         }
+
         return countries;
     }
-
-    private Long selectedCountryId;
 
     public Long getSelectedCountryId() {
         return selectedCountryId;
@@ -72,16 +63,6 @@ public class EmissionsController implements Serializable {
         this.selectedCountryId = selectedCountryId;
     }
 
-    // ==============================
-    // DETAILANSICHT LAND
-    // ==============================
-
-    private Emission latestSelectedEmission;
-    private List<Emission> emissionsOfCountry;
-    private String lineModel;
-
-
-
     public Emission getLatestSelectedEmission() {
         return latestSelectedEmission;
     }
@@ -90,12 +71,22 @@ public class EmissionsController implements Serializable {
         return lineModel;
     }
 
+    public Emission getSelectedEmission() {
+        if (selectedEmission == null) {
+            selectedEmission = new Emission();
+        }
+
+        return selectedEmission;
+    }
+
+    public boolean isNewMode() {
+        return newMode;
+    }
 
     /**
-     * Wird vom Submit-Button aufgerufen
+     * Lädt die aktuellen Emissionsdaten und die Historie des ausgewählten Landes.
      */
     public void loadCountryData() {
-
         if (selectedCountryId == null) {
             latestSelectedEmission = null;
             emissionsOfCountry = null;
@@ -109,29 +100,23 @@ public class EmissionsController implements Serializable {
         createLineModel();
     }
 
-
     /**
-     * Chart für PrimeFaces 13 erzeugen
+     * Erstellt das JSON-Modell für das PrimeFaces-Liniendiagramm.
      */
     private void createLineModel() {
-
         if (emissionsOfCountry == null || emissionsOfCountry.isEmpty()) {
             lineModel = null;
             return;
         }
 
-        StringBuilder labels = new StringBuilder();
-        StringBuilder values = new StringBuilder();
-
-        labels.append("[");
-        values.append("[");
+        StringBuilder labels = new StringBuilder("[");
+        StringBuilder values = new StringBuilder("[");
 
         for (int i = 0; i < emissionsOfCountry.size(); i++) {
+            Emission emission = emissionsOfCountry.get(i);
 
-            Emission e = emissionsOfCountry.get(i);
-
-            labels.append("\"").append(e.getYear()).append("\"");
-            values.append(e.getCo2Kt());
+            labels.append("\"").append(emission.getYear()).append("\"");
+            values.append(emission.getCo2Value());
 
             if (i < emissionsOfCountry.size() - 1) {
                 labels.append(",");
@@ -142,8 +127,7 @@ public class EmissionsController implements Serializable {
         labels.append("]");
         values.append("]");
 
-        lineModel =
-            "{"
+        lineModel = "{"
             + "\"type\":\"line\","
             + "\"data\":{"
             + "\"labels\":" + labels + ","
@@ -169,50 +153,29 @@ public class EmissionsController implements Serializable {
             + "}";
     }
 
-
-
-    // ==============================
-    // BACKEND – SELEKTIERTER DATENSATZ
-    // ==============================
-
-    private Emission selectedEmission;
-    private boolean newMode = false;
-
-    public Emission getSelectedEmission() {
-        if (selectedEmission == null) {
-            selectedEmission = new Emission();
-        }
-        return selectedEmission;
-    }
-
-    public boolean isNewMode() {
-        return newMode;
-    }
-
-    public void selectEmission(Emission e) {
-        this.selectedEmission = e;
-        this.newMode = false;
+    public void selectEmission(Emission emission) {
+        selectedEmission = emission;
+        newMode = false;
     }
 
     public void prepareNewEmission() {
-        this.selectedEmission = new Emission();
-        this.newMode = true;
+        selectedEmission = new Emission();
+        newMode = true;
     }
 
-    // ==============================
-    // WISSENSCHAFTLER – BESTEHENDEN DATENSATZ ÄNDERN
-    // ==============================
-
+    /**
+     * Speichert die Änderung eines bestehenden Datensatzes als ausstehende Änderung.
+     */
     public void saveEmission() {
-
         FacesContext context = FacesContext.getCurrentInstance();
 
-        // Validierung: Pending-Wert muss eingegeben sein
-        if (selectedEmission.getCo2KtPending() == null) {
-
+        if (selectedEmission.getCo2ValuePending() == null) {
             context.addMessage("backendForm:pendingInput",
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    "Fehler", "Bitte einen neuen CO₂-Wert eingeben."));
+                new FacesMessage(
+                    FacesMessage.SEVERITY_ERROR,
+                    "Fehler",
+                    "Bitte einen neuen CO₂-Wert eingeben."
+                ));
 
             context.validationFailed();
             PrimeFaces.current().ajax().addCallbackParam("validationFailed", true);
@@ -220,115 +183,123 @@ public class EmissionsController implements Serializable {
             return;
         }
 
-        // Status auf PENDING setzen
         selectedEmission.setStatus("PENDING");
-
-        // Änderung speichern
         emissionDAO.update(selectedEmission);
 
-        // Globale Erfolgsmeldung
-        context.addMessage(null,
-            new FacesMessage(FacesMessage.SEVERITY_INFO,
-                "Änderung gespeichert",
-                "Datensatz wurde als PENDING markiert."));
+        String countryName = selectedEmission.getCountry().getName();
 
-        // Tabelle neu laden
+        context.addMessage(null,
+            new FacesMessage(
+                FacesMessage.SEVERITY_INFO,
+                "Änderung gespeichert",
+                "Datensatz mit Land " + countryName + " wurde als PENDING markiert."
+            ));
+
         latestEmissions = null;
     }
 
-    // ==============================
-    // WISSENSCHAFTLER – NEUEN DATENSATZ ANLEGEN
-    // ==============================
-
+    /**
+     * Legt einen neuen Emissionsdatensatz mit dem Status PENDING an.
+     */
     public void saveNewEmission() {
+        FacesContext context = FacesContext.getCurrentInstance();
 
         if (selectedCountryId != null) {
             Country country = countryDAO.findCountry(selectedCountryId);
             selectedEmission.setCountry(country);
         }
 
-        if (selectedEmission.getCountry() == null ||
-            selectedEmission.getYear() == null ||
-            selectedEmission.getCo2KtPending() == null) {
+        if (selectedEmission.getCountry() == null
+                || selectedEmission.getYear() == null
+                || selectedEmission.getCo2ValuePending() == null) {
 
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+            context.addMessage("backendForm:dlgMsgs",
+                new FacesMessage(
+                    FacesMessage.SEVERITY_ERROR,
                     "Fehler",
-                    "Bitte alle Felder ausfüllen."));
+                    "Bitte alle Felder ausfüllen."
+                ));
+
+            context.validationFailed();
+            PrimeFaces.current().ajax().addCallbackParam("validationFailed", true);
+
             return;
         }
 
         boolean exists = emissionDAO.existsByCountryAndYear(
-                selectedEmission.getCountry().getId(),
-                selectedEmission.getYear());
+            selectedEmission.getCountry().getId(),
+            selectedEmission.getYear()
+        );
 
         if (exists) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
+            context.addMessage("backendForm:dlgMsgs",
+                new FacesMessage(
+                    FacesMessage.SEVERITY_ERROR,
                     "Fehler",
-                    "Für dieses Land existiert bereits ein Datensatz für dieses Jahr."));
+                    "Für dieses Land existiert bereits ein Datensatz für dieses Jahr."
+                ));
+
+            context.validationFailed();
+            PrimeFaces.current().ajax().addCallbackParam("validationFailed", true);
+
             return;
         }
 
         selectedEmission.setStatus("PENDING");
-        selectedEmission.setCo2Kt(null);
+        selectedEmission.setCo2Value(null);
         selectedEmission.setUnit("kt");
 
         emissionDAO.create(selectedEmission);
 
-        FacesContext.getCurrentInstance().addMessage(null,
-            new FacesMessage(FacesMessage.SEVERITY_INFO,
+        String countryName = selectedEmission.getCountry().getName();
+
+        context.addMessage(null,
+            new FacesMessage(
+                FacesMessage.SEVERITY_INFO,
                 "Erfolgreich",
-                "Neuer Datensatz wurde angelegt (Status: PENDING)."));
+                "Neuer Datensatz mit Land " + countryName
+                    + " wurde angelegt und als PENDING markiert."
+            ));
 
         newMode = false;
         latestEmissions = null;
     }
 
-    // ==============================
-    // HERAUSGEBER – VALIDIEREN
-    // ==============================
-
+    /**
+     * Übernimmt einen ausstehenden CO₂-Wert und gibt den Datensatz frei.
+     */
     public void validateEmission() {
-
-        if (selectedEmission == null) return;
-
-        if (selectedEmission.getCo2KtPending() != null) {
-
-            selectedEmission.setCo2Kt(selectedEmission.getCo2KtPending());
-            selectedEmission.setCo2KtPending(null);
-            selectedEmission.setStatus("APPROVED");
-
-            emissionDAO.update(selectedEmission);
-
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO,
-                    "Validiert",
-                    "Datensatz wurde freigegeben."));
+        if (selectedEmission.getCo2ValuePending() == null) {
+            return;
         }
+
+        selectedEmission.setCo2Value(selectedEmission.getCo2ValuePending());
+        selectedEmission.setCo2ValuePending(null);
+        selectedEmission.setStatus("APPROVED");
+
+        emissionDAO.update(selectedEmission);
+
+        String countryName = selectedEmission.getCountry().getName();
+
+        FacesContext.getCurrentInstance().addMessage(null,
+            new FacesMessage(
+                FacesMessage.SEVERITY_INFO,
+                "Validiert",
+                "Datensatz mit Land " + countryName + " wurde freigegeben."
+            ));
 
         latestEmissions = null;
     }
-
-    // ==============================
-    // NAVIGATION
-    // ==============================
 
     public String returnEmissionsPage() {
         return "emissions.xhtml";
     }
 
     public void save() {
-
         if (newMode) {
             saveNewEmission();
         } else {
             saveEmission();
         }
-    }
-
-    @PostConstruct
-    public void init() {
-        System.out.println("EmissionsController wurde erzeugt");
     }
 }

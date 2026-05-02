@@ -1,12 +1,12 @@
 package controller;
 
+import java.io.Serializable;
+
 import dao.UserDAO;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import model.User;
-
-import java.io.Serializable;
 
 @Named
 @SessionScoped
@@ -45,31 +45,36 @@ public class AuthController implements Serializable {
     }
 
     public String login() {
-
         User user = userDAO.findByUsernameAndPassword(
-                loginUser.getUsername(),
-                loginUser.getPassword()
+            loginUser.getUsername(),
+            loginUser.getPassword()
         );
 
-        if (user != null) {
-            currentUser = user;
-            loginUser = new User();
-            return "backend.xhtml";
+        if (user == null) {
+            return null;
         }
 
-        return null;
+        currentUser = user;
+        loginUser = new User();
+
+        return "backend.xhtml?faces-redirect=true";
     }
 
     public String logout() {
         currentUser = null;
         loginUser = new User();
+
         return "index.xhtml?faces-redirect=true";
     }
 
+    /**
+     * Verhindert den Zugriff auf geschützte Seiten ohne Anmeldung.
+     */
     public String ensureLoggedIn() {
         if (!isLoggedIn()) {
             return "login.xhtml?faces-redirect=true";
         }
+
         return null;
     }
 
