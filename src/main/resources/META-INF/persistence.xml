@@ -20,11 +20,11 @@
             <property name="jakarta.persistence.jdbc.url"
                       value="jdbc:mysql://localhost:3306/like_hero_to_zero"/>
 
-            <property name="jakarta.persistence.jdbc.user"
-                      value="lhz_user"/>
-
-            <property name="jakarta.persistence.jdbc.password"
-                      value="q|iET£Y82A7C"/>
+			<property name="jakarta.persistence.jdbc.user"
+			          value="lhz_user"/>
+			
+			<property name="jakarta.persistence.jdbc.password"
+			          value="lhz_password"/>
 
             <!-- Hibernate -->
             <property name="hibernate.dialect"
@@ -33,9 +33,8 @@
             <!-- Debug -->
             <property name="hibernate.show_sql" value="true"/>
 
-            <!-- Wichtig: noch nichts anfassen -->
-            <property name="hibernate.hbm2ddl.auto"
-                      value="validate"/>
+
+			<property name="hibernate.hbm2ddl.auto" value="create"/>
 
         </properties>
 
