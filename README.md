@@ -1,6 +1,6 @@
 # Like Hero To Zero
 
-Diese Webanwendung wurde im Rahmen der Fallstudie im Modul „Programmierung von industriellen Informationssystemen“ erstellt. Sie stellt CO₂-Emissionsdaten öffentlich dar und bietet ein geschütztes Backend zur Pflege und Validierung von Daten.
+Diese Webanwendung wurde im Rahmen der Fallstudie im Modul „Programmierung von industriellen Informationssysteme mit Java EE (IPWA02-01)“ erstellt. Sie stellt CO₂-Emissionsdaten öffentlich dar und bietet ein geschütztes Backend zur Pflege und Validierung von Daten.
 
 ## Verwendete Technologien
 
