@@ -50,7 +50,15 @@ src/main/resources/import.sql
 
 ausgeführt. Diese Datei enthält die Initialdaten für Länder, Benutzer und Emissionswerte.
 
-Die Emissionsdaten stammen aus einem OWID-basierten CO₂-Datensatz (liegt im Repository vor). Für die Anwendung wurden je Land die letzten zehn verfügbaren Jahreswerte übernommen. Die Werte werden in Millionen Tonnen CO₂ gespeichert.
+## Datengrundlage
+
+Der ursprüngliche OWID-basierte CO₂-Datensatz befindet sich im Repository unter:
+
+```text
+data/original/owid_cb_co2_original.zip
+```
+
+Für die Anwendung wurden daraus je Land die letzten zehn verfügbaren Jahreswerte übernommen. Die daraus erzeugten Initialdaten befinden sich in src/main/resources/import.sql und werden beim Start der Anwendung automatisch eingespielt.
 
 ## Anwendung starten
 
