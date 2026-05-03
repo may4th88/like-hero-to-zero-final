@@ -55,7 +55,7 @@ ausgeführt. Diese Datei enthält die Initialdaten für Länder, Benutzer und Em
 Der ursprüngliche OWID-basierte CO₂-Datensatz befindet sich im Repository unter:
 
 ```text
-data/original/owid_cb_co2_original.zip
+database/source/owid_cb_co2.zip
 ```
 
 Für die Anwendung wurden daraus je Land die letzten zehn verfügbaren Jahreswerte übernommen. Die daraus erzeugten Initialdaten befinden sich in src/main/resources/import.sql und werden beim Start der Anwendung automatisch eingespielt.
