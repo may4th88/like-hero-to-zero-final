@@ -132,7 +132,7 @@ public class EmissionsController implements Serializable {
             + "\"data\":{"
             + "\"labels\":" + labels + ","
             + "\"datasets\":[{"
-            + "\"label\":\"CO₂ Emissionen (kt)\","
+            + "\"label\":\"CO₂ Emissionen (Mio. t)\","
             + "\"data\":" + values + ","
             + "\"borderColor\":\"rgb(75, 192, 192)\","
             + "\"backgroundColor\":\"rgba(75, 192, 192,0.2)\","
@@ -247,7 +247,7 @@ public class EmissionsController implements Serializable {
 
         selectedEmission.setStatus("PENDING");
         selectedEmission.setCo2Value(null);
-        selectedEmission.setUnit("kt");
+        selectedEmission.setUnit("Mio. t");
 
         emissionDAO.create(selectedEmission);
 
