@@ -42,7 +42,7 @@ FLUSH PRIVILEGES;
 
 ## Automatische Initialisierung der Datenbank
 
-Beim Start der Anwendung erzeugt Hibernate die Tabellen automatisch. Anschließend wird die Datei
+Beim ersten Abruf der Emissionstabelle erzeugt Hibernate die Tabellen automatisch. Anschließend wird die Datei
 
 ```text
 src/main/resources/import.sql
@@ -50,7 +50,17 @@ src/main/resources/import.sql
 
 ausgeführt. Diese Datei enthält die Initialdaten für Länder, Benutzer und Emissionswerte.
 
-Die Emissionsdaten stammen aus einem OWID-basierten CO₂-Datensatz (liegt im Repository vor). Für die Anwendung wurden je Land die letzten zehn verfügbaren Jahreswerte übernommen. Die Werte werden in Millionen Tonnen CO₂ gespeichert.
+Zur einfachen lokalen Einrichtung wird die Datenbankstruktur beim Start der Anwendung über Hibernate neu erzeugt. Für eine produktive Umgebung wäre dagegen eine Verwaltung über versionierte Datenbankskripte vorzuziehen, damit Änderungen nachvollziehbar bleiben und bestehende Daten nicht unbeabsichtigt gelöscht werden.
+
+## Datengrundlage
+
+Der ursprüngliche OWID-basierte CO₂-Datensatz befindet sich im Repository unter:
+
+```text
+database/source/owid_cb_co2.zip
+```
+
+Für die Anwendung wurden daraus je Land die letzten zehn verfügbaren Jahreswerte übernommen. Die daraus erzeugten Initialdaten befinden sich in src/main/resources/import.sql und werden beim Start der Anwendung automatisch eingespielt.
 
 ## Anwendung starten
 
@@ -86,7 +96,3 @@ Passwort: editor
 
 - Wissenschaftler können neue Emissionsdaten anlegen oder bestehende Werte zur Änderung vormerken.
 - Herausgeber können vorgemerkte Änderungen validieren.
-
-## Hinweis
-
-Die Anwendung ist für die lokale Ausführung im Rahmen der Fallstudie vorbereitet. Die Datenbank wird beim Start anhand der JPA-Entities neu erzeugt und mit Beispieldaten befüllt.
