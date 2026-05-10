@@ -50,7 +50,7 @@ src/main/resources/import.sql
 
 ausgeführt. Diese Datei enthält die Initialdaten für Länder, Benutzer und Emissionswerte.
 
-Für die lokale Demonstrations- und Prüfungsumgebung wird die Datenbankstruktur beim Start über Hibernate neu erzeugt. In einer produktiven Umgebung sollte die Datenbankstruktur dagegen kontrolliert über versionierte Datenbankskripte verwaltet werden, damit Änderungen nachvollziehbar bleiben und bestehende Daten nicht unbeabsichtigt gelöscht werden.
+Zur einfachen lokalen Einrichtung wird die Datenbankstruktur beim Start der Anwendung über Hibernate neu erzeugt. Für eine produktive Umgebung wäre dagegen eine Verwaltung über versionierte Datenbankskripte vorzuziehen, damit Änderungen nachvollziehbar bleiben und bestehende Daten nicht unbeabsichtigt gelöscht werden.
 
 ## Datengrundlage
 
