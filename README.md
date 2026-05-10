@@ -96,7 +96,3 @@ Passwort: editor
 
 - Wissenschaftler können neue Emissionsdaten anlegen oder bestehende Werte zur Änderung vormerken.
 - Herausgeber können vorgemerkte Änderungen validieren.
-
-## Hinweis
-
-Die Anwendung ist für die lokale Ausführung im Rahmen der Fallstudie vorbereitet. Die Datenbank wird beim Start anhand der JPA-Entities neu erzeugt und mit Beispieldaten befüllt.
